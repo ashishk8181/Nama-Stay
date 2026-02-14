@@ -10,9 +10,7 @@ from . import models, forms
 from users import mixins as user_mixins
 
 
-
 class HomeView(ListView):
-
     """Home View Definition"""
 
     model = models.Room
@@ -52,7 +50,7 @@ def search(request):
             filter_args = {}
 
             if city != "Anywhere":
-                filter_args["city_startswith"] = city
+                filter_args["city__istartswith"] = city
 
             filter_args["country"] = country
 
@@ -80,21 +78,23 @@ def search(request):
             if superhost:
                 filter_args["host__superhost"] = True
 
+            qs = models.Room.objects.filter(**filter_args)
+
             for amenity in amenities:
-                filter_args["amenity"] = amenity
+                qs = qs.filter(amenity=amenity)
 
             for facility in facilities:
-                filter_args["facility"] = facility
+                qs = qs.filter(facility=facility)
 
-            qs = models.Room.objects.filter(**filter_args).order_by("-created")
-
+            qs = qs.order_by("-created")
+            print(qs)
             paginator = Paginator(qs, 10, orphans=5)
 
             page = request.GET.get("page", 1)
 
             rooms = paginator.get_page(page)
 
-            return render(request, "rooms/search.html", {"form": form})
+            return render(request, "rooms/search.html", {"form": form, "rooms": rooms})
 
     else:
         form = forms.SearchForm()
@@ -127,25 +127,26 @@ class EditRoomView(user_mixins.LoggedInOnlyView, UpdateView):
     )
 
     def get_object(self, queryset=None):
-        room =  super().get_object(queryset)
+        room = super().get_object(queryset)
         if room.host.pk != self.request.user.pk:
             raise Http404()
         return room
-    
+
 
 class RoomPhotosView(user_mixins.LoggedInOnlyView, Room_Detail):
 
     template_name = "rooms/room_photos.html"
 
     def get_object(self, queryset=None):
-        room =  super().get_object(queryset)
+        room = super().get_object(queryset)
         if room.host.pk != self.request.user.pk:
             raise Http404()
         return room
 
+
 @login_required
 def delete_photo(request, room_pk, photo_pk):
-    
+
     user = request.user
     try:
         room = models.Room.objects.get(pk=room_pk)
@@ -166,7 +167,7 @@ class EditPhotoView(user_mixins.LoggedInOnlyView, SuccessMessageMixin, UpdateVie
     fields = ("caption",)
     pk_url_kwarg = "photo_pk"
     success_message = "Photo Updated"
-    
+
     def get_success_url(self):
         room_pk = self.kwargs.get("room_pk")
         return reverse("rooms:photos", kwargs={"pk": room_pk})
@@ -178,7 +179,7 @@ class AddPhotoView(user_mixins.LoggedInOnlyView, FormView):
     form_class = forms.CreatePhotoForm
 
     def form_valid(self, form):
-        pk = self.kwargs.get('pk')
+        pk = self.kwargs.get("pk")
         form.save(pk)
         messages.success(self.request, "Photo uploaded")
         return redirect(reverse("rooms:photos", kwargs={"pk": pk}))
@@ -196,4 +197,3 @@ class AddRoomView(user_mixins.LoggedInOnlyView, FormView):
         form.save_m2m()
         messages.success(self.request, "Room added")
         return redirect(reverse("rooms:detail", kwargs={"pk": room.pk}))
-        
