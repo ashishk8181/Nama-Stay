@@ -1551,3 +1551,25 @@ input[type=checkbox]{
     width: 360px;
   }
 }
+
+/* .a:hover {
+ text-decoration: underline !important;
+ } */
+
+
+/* Custom hover underline class */
+.hover-underline {
+  padding-bottom: 4px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s;
+}
+
+.hover-underline:hover {
+  border-bottom-color: black;
+}
+
+/* Smooth scroll with offset for fixed header */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 125px;
+}

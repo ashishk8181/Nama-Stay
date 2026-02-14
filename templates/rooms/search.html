@@ -4,22 +4,103 @@
     Search
 {% endblock page_title %}
 
-{% block search-bar %}
-{% endblock search-bar %}
-
 {% block content %}
-    <h2>Search</h2>
+    <div class="container w-11/12 mx-auto pb-10">
+        <h2 class="text-3xl font-medium mb-8">Search</h2>
 
-    <form method="get" action="{% url 'rooms:search' %}">
-        {{form.as_p}}
-        <button>Search</button>
-    </form>
+        <style>
+            #id_amenities, #id_facilities {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 1rem;
+            }
+        </style>
 
-    <div>
-        <h3>Results</h3>
-        {% for room in rooms %}
-            <h3>{{room.name}}</h3>
-        {% endfor %}
+        <form method="get" action="{% url 'rooms:search' %}" class="mb-10">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium mb-1">City</label>
+                    {{form.city}}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Country</label>
+                    {{form.country}}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Price</label>
+                    {{form.price}}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Room Type</label>
+                    {{form.room_type}}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Guests</label>
+                    {{form.guests}}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Bedrooms</label>
+                    {{form.bedroom}}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Beds</label>
+                    {{form.beds}}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Baths</label>
+                    {{form.baths}}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="flex items-center">
+                    {{form.instant_book}}
+                    <label class="ml-2">Instant Book</label>
+                </div>
+                <div class="flex items-center">
+                    {{form.superhost}}
+                    <label class="ml-2">Superhost</label>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-2">Amenities</label>
+                {{form.amenities}}
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-2">Facilities</label>
+                {{form.facilities}}
+            </div>
+
+            <button class="bg-teal-500 text-white px-5 py-2 rounded">Search</button>
+        </form>
+
+        {% if rooms %}
+            <h3 class="text-2xl font-medium mb-6">Results</h3>
+            <div class="flex flex-wrap justify-between mb-10">
+                {% for room in rooms %}
+                    {% include 'partials/room_card.html' with room=room %}
+                {% endfor %}
+            </div>
+
+            <div class="flex items-center justify-center">
+                {% if rooms.has_previous %}
+                    <a href="?page={{rooms.previous_page_number}}&{{request.GET.urlencode}}" class="text-teal-500">
+                        <i class="fas fa-arrow-left fa-lg"></i>
+                    </a>
+                {% endif %}
+
+                <span class="mx-3 font-medium text-lg">
+                    {{rooms.number}} of {{rooms.paginator.num_pages}}
+                </span>
+
+                {% if rooms.has_next %}
+                    <a href="?page={{rooms.next_page_number}}&{{request.GET.urlencode}}" class="text-teal-500">
+                        <i class="fas fa-arrow-right fa-lg"></i>
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
     </div>
-
 {% endblock content %}

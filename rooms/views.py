@@ -27,7 +27,13 @@ class Room_Detail(DetailView):
 
 def search(request):
 
+    city = request.GET.get("city")
     country = request.GET.get("country")
+
+    if city and not country:
+        # pre-fill form with search city
+        form = forms.SearchForm(initial={"city": city})
+        return render(request, "rooms/search.html", {"form": form})
 
     if country:
         form = forms.SearchForm(request.GET)

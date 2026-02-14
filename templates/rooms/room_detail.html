@@ -9,7 +9,7 @@
     <div class="w-full flex justify-between  mb-10">
       <div class="">
         <h4 class="text-3xl font-medium mb-px">{{room.name}}</h4>
-        <span class="text-gray-700 font-medium">{{room.city}}</span>
+        <span id="location" class="text-gray-700 font-medium">{{room.city}}, {{room.country}}</span>
       </div>
       <div class="mt-2">
         {% on_favs room as on_favs_bool %}
@@ -25,16 +25,65 @@
       </div>
     </div>
   
-    <div class="container h-65vh flex mb-20">
+    <div  class="container h-65vh flex mb-20">
       <div class="h-full w-1/2 bg-cover bg-center rounded-l-2xl mr-2" style="background-image:url({{room.first_photo}})" ></div>
-      <div class="h-full w-1/2 flex flex-wrap">
+      <div id="photos-section" class="h-full w-1/2 flex flex-wrap">
         {% for photo in room.get_next_photos  %}
           <div class="rounded-sm {% if forloop.counter <= 2 %}mb-2{% endif %}  {% if forloop.counter == 2 %}rounded-tr-2xl ml-2{% elif forloop.counter == 4 %}rounded-br-2xl ml-2{% endif %} h-auto bg-cover bg-center border border-gray-400" style="width: 48%; background-image:url({{photo.file.url}})"></div>
         {% endfor %}
       </div>
     </div>
-  
-    <div class="container w-full pb-12 flex justify-between">
+
+    <!-- Room Navigation (Hidden initially, shown on scroll) -->
+    <div id="room-nav" class="container h-10 w-full mx-0 mb-4" style="display: none; position: fixed; top: 70px; background: white;">
+      <div class="w-full flex justify-between items-center  mb-5">
+        <div class="w-1/3 text-base font-semibold flex justify-between ">
+          <a href="#photos-section" class="hover-underline">Photos</a>
+          <a href="#amenities" class="hover-underline">Amenities</a>
+          <a href="#reviews" class="hover-underline">Reviews</a>
+          <a href="#location" class="hover-underline">Location</a>
+        </div>
+        <div class="w-1/4 h-full flex justify-between items-center">
+          <div class="flex-col justify-center">
+            <div class=" mb-1 text-base font-semibold">
+              <span class=" ">${{room.price}}</span>
+              <span class="mr-6"> nightly</span>
+            </div>
+            <a href="#reviews" class="flex items-center text-sm">
+              <i class="fas fa-star text-red-500 mr-1"></i>
+              <span class="">{{room.total_rating}}</span>
+              <span class="text-gray-700 ml-1">({{room.reviews.count}} reviews)</span>
+            </a>
+          </div>
+          <div class="flex ">
+            {% if room.host != user and not request.session.is_hosting %}
+              <a href="#booking" class="bg-red-500 text-white px-5 py-3 rounded-lg font-semibold hover:bg-red-600 transition-colors">Book Now</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const roomNav = document.getElementById('room-nav');
+        const photosSection = document.getElementById('photos-section');
+        
+        window.addEventListener('scroll', function() {
+          if (photosSection) {
+            const rect = photosSection.getBoundingClientRect();
+            
+            if (rect.bottom <= 100) {
+              roomNav.style.display = 'block';
+            } else {
+              roomNav.style.display = 'none';
+            }
+          }
+        });
+      });
+    </script>
+
+    <div class="container w-full pb-12 flex justify-between" id="booking">
       <div class="w-3/5">
         <div class="flex justify-between border-section">
 
@@ -57,7 +106,7 @@
 
         <p class="py-8 border-section">{{room.description}}</p>
 
-        <div class="border-section py-8">
+        <div class="border-section py-8" id="amenities">
           <h4 class="font-medium text-2xl mb-5">What this place offers</h4>
           <div class="w-full flex flex-wrap">
             {% for a in room.amenity.all %}
@@ -134,7 +183,7 @@
       
     </div>
     
-    <div class="py-10 border-t border-gray-200">
+    <div class="py-10 border-t border-gray-200" id="reviews">
       <h4 class="font-semibold text-3xl mb-5">Reviews</h4>
       <div class="flex items-center">
         <div class="mr-5 flex items-center">
